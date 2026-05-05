@@ -1,0 +1,380 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<title>Terminal Chat</title>
+
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;700&display=swap" rel="stylesheet">
+
+<style>
+  * { box-sizing: border-box; }
+
+  body {
+    margin: 0;
+    font-family: "JetBrains Mono", monospace;
+    background: #05060a;
+    color: #e6e6e6;
+    height: 100vh;
+    display: flex;
+    justify-content: center;
+  }
+
+  .chat {
+    width: 100%;
+    max-width: 900px;
+    display: flex;
+    flex-direction: column;
+    padding: 12px;
+  }
+
+  .topbar {
+    display: flex;
+    justify-content: space-between;
+    padding: 10px;
+    border: 1px solid #2b2f36;
+    background: #111318;
+  }
+
+  #messages {
+    flex: 1;
+    overflow-y: auto;
+    background: #0b0d12;
+    border: 1px solid #2b2f36;
+    padding: 10px;
+    margin-top: 10px;
+    min-height: 300px;
+  }
+
+  .msg {
+    padding: 8px;
+    margin: 8px 0;
+    background: #12151c;
+    border-left: 2px solid #5a5f66;
+  }
+
+  .user {
+    font-size: 11px;
+    color: #b8b8b8;
+  }
+
+  .inputRow {
+    display: flex;
+    gap: 8px;
+    margin-top: 10px;
+  }
+
+  input {
+    flex: 1;
+    padding: 10px;
+    background: #0b0d12;
+    border: 1px solid #2b2f36;
+    color: #e6e6e6;
+    font-family: "JetBrains Mono";
+  }
+
+  button {
+    padding: 10px 12px;
+    background: #111318;
+    border: 1px solid #2b2f36;
+    color: #e6e6e6;
+    cursor: pointer;
+  }
+
+  .usersBox {
+    margin-top: 12px;
+    padding: 10px;
+    border: 1px solid #2b2f36;
+    background: #0b0d12;
+  }
+
+  ul {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+  }
+
+  li {
+    padding: 6px;
+    margin-bottom: 6px;
+    background: #12151c;
+    border: 1px solid #2b2f36;
+    font-size: 12px;
+  }
+
+  .login {
+    position: fixed;
+    inset: 0;
+    background: #05060a;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+  }
+</style>
+</head>
+
+<body>
+
+<!-- LOGIN -->
+<div class="login" id="login">
+  <input id="nameInput" placeholder="username..." />
+  <button onclick="setName()">login</button>
+</div>
+
+<!-- CHAT -->
+<div class="chat">
+
+  <div class="topbar">
+    <div>terminal-chat</div>
+    <div>
+      <span id="userDisplay">offline</span>
+      <button onclick="logout()">logout</button>
+    </div>
+  </div>
+
+  <div id="messages"></div>
+
+  <div class="inputRow">
+    <input id="textInput" placeholder="type message..." />
+    <button onclick="sendText()">SEND</button>
+  </div>
+
+  <div class="usersBox">
+    <div>ONLINE USERS</div>
+    <div id="users"></div>
+  </div>
+
+</div>
+
+<script type="module">
+
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.0/firebase-app.js";
+import {
+  getFirestore,
+  collection,
+  addDoc,
+  setDoc,
+  deleteDoc,
+  doc,
+  onSnapshot,
+  query,
+  orderBy
+} from "https://www.gstatic.com/firebasejs/10.7.0/firebase-firestore.js";
+
+const firebaseConfig = {
+  apiKey: "YOUR_FIREBASE_KEY",
+  authDomain: "cerac-terminal.firebaseapp.com",
+  projectId: "cerac-terminal",
+  storageBucket: "cerac-terminal.firebasestorage.app",
+  messagingSenderId: "141584321783",
+  appId: "1:141584321783:web:a06f4147d64f87e9db97f2"
+};
+
+const app = initializeApp(firebaseConfig);
+const db = getFirestore(app);
+
+const chatRef = collection(db, "chat");
+const usersRef = collection(db, "users");
+
+let username = null;
+let heartbeat = null;
+let typingTimeout = null;
+
+/* LOGIN */
+window.setName = async function () {
+  const name = document.getElementById("nameInput").value.trim();
+  if (!name) return;
+
+  username = name;
+
+  document.getElementById("login").style.display = "none";
+  document.getElementById("userDisplay").textContent = username;
+
+  await setDoc(doc(db, "users", username), {
+    name: username,
+    lastSeen: Date.now(),
+    typingAt: 0
+  });
+
+  startHeartbeat();
+};
+
+/* 💥 FIXED LOGOUT (NO ZOMBIE USERS) */
+window.logout = async function () {
+  if (!username) return;
+
+  const ref = doc(db, "users", username);
+
+  try {
+    // STOP HEARTBEAT FIRST (critical fix)
+    if (heartbeat) clearInterval(heartbeat);
+    heartbeat = null;
+
+    // mark offline instantly
+    await setDoc(ref, {
+      name: username,
+      lastSeen: 0,
+      typingAt: 0
+    }, { merge: true });
+
+    // allow sync time
+    await new Promise(r => setTimeout(r, 250));
+
+    // delete user
+    await deleteDoc(ref);
+
+  } catch (e) {
+    console.log("logout error ignored:", e);
+  }
+
+  // reset state
+  username = null;
+  localStorage.removeItem("scrap_username");
+
+  // reset UI
+  document.getElementById("login").style.display = "flex";
+  document.getElementById("userDisplay").textContent = "offline";
+  document.getElementById("users").innerHTML = "";
+};
+
+/* HEARTBEAT */
+function startHeartbeat() {
+  if (heartbeat) clearInterval(heartbeat);
+
+  heartbeat = setInterval(async () => {
+    if (!username) return;
+
+    await setDoc(doc(db, "users", username), {
+      lastSeen: Date.now()
+    }, { merge: true });
+
+  }, 5000);
+}
+
+/* TYPING */
+document.getElementById("textInput").addEventListener("input", async () => {
+  if (!username) return;
+
+  await setDoc(doc(db, "users", username), {
+    typingAt: Date.now()
+  }, { merge: true });
+
+  clearTimeout(typingTimeout);
+
+  typingTimeout = setTimeout(async () => {
+    if (!username) return;
+
+    await setDoc(doc(db, "users", username), {
+      typingAt: 0
+    }, { merge: true });
+
+  }, 1200);
+});
+
+/* SEND */
+window.sendText = async function () {
+  const input = document.getElementById("textInput");
+  const text = input.value.trim();
+  if (!text || !username) return;
+
+  await addDoc(chatRef, {
+    text,
+    user: username,
+    time: Date.now()
+  });
+
+  input.value = "";
+
+  await setDoc(doc(db, "users", username), {
+    typingAt: 0
+  }, { merge: true });
+};
+
+/* CHAT */
+onSnapshot(query(chatRef, orderBy("time")), snap => {
+  const box = document.getElementById("messages");
+  box.innerHTML = "";
+
+  snap.forEach(d => {
+    const data = d.data();
+
+    const div = document.createElement("div");
+    div.className = "msg";
+
+    div.innerHTML = `
+      <div class="user">> ${data.user}</div>
+      <div>${data.text}</div>
+    `;
+
+    box.appendChild(div);
+  });
+});
+
+/* USERS (STABLE + NO EMPTY BUG) */
+const typingStates = {};
+
+onSnapshot(usersRef, snap => {
+  const usersBox = document.getElementById("users");
+  usersBox.innerHTML = "";
+
+  const now = Date.now();
+  const users = [];
+
+  snap.forEach(d => {
+    const u = d.data();
+    if (!u?.name) return;
+
+    const lastSeen = u.lastSeen ?? now;
+    const online = now - lastSeen < 20000;
+
+    if (online) users.push(u);
+  });
+
+  if (users.length === 0) {
+    const empty = document.createElement("div");
+    empty.style.fontSize = "12px";
+    empty.style.opacity = "0.6";
+    empty.textContent = "no users online";
+    usersBox.appendChild(empty);
+    return;
+  }
+
+  users.sort((a, b) => a.name.localeCompare(b.name));
+
+  const ul = document.createElement("ul");
+
+  users.forEach(u => {
+    let label = u.name;
+
+    const isTyping =
+      u.name !== username &&
+      u.typingAt &&
+      now - u.typingAt < 2500;
+
+    if (isTyping) label += " (typing...)";
+
+    const li = document.createElement("li");
+    li.textContent = label;
+
+    ul.appendChild(li);
+  });
+
+  usersBox.appendChild(ul);
+});
+
+/* RESTORE SESSION */
+const saved = localStorage.getItem("scrap_username");
+if (saved) {
+  username = saved;
+  document.getElementById("login").style.display = "none";
+  document.getElementById("userDisplay").textContent = username;
+  startHeartbeat();
+}
+
+</script>
+
+</body>
+</html>
