@@ -1,380 +1,1207 @@
-<!DOCTYPE html>
-<html>
-<head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<!DOCTYPE html><html lang="en"><head>
+  <meta name="google-site-verification" content="qJFFoyjlRTGykLNXTjlKtnjBzyfIPal8qDZaOu5pfXI">
+  <title>Cerac Chat - Online Chatting App</title>
 
-<title>Terminal Chat</title>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;700&display=swap" rel="stylesheet">
+  <meta name="title" content="Cerac Chat">
+  <meta name="description" content="Cerac Chat is a chatting platform that provides to it's users ease of access ,reliability and comfort.">
+  <meta name="keywords" content="Cerac Chat, chat app, messaging, chat, online chatting website">
+  <meta name="author" content="Cerac Chat">
+  <meta name="robots" content="index, follow">
 
-<style>
-  * { box-sizing: border-box; }
+  <meta property="og:title" content="Cerac Chat">
+  <meta property="og:description" content="Real-time chatting website.">
+  <meta property="og:type" content="website">
 
-  body {
-    margin: 0;
-    font-family: "JetBrains Mono", monospace;
-    background: #05060a;
-    color: #e6e6e6;
-    height: 100vh;
-    display: flex;
-    justify-content: center;
-  }
+<!-- Google Fonts -->
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 
-  .chat {
-    width: 100%;
-    max-width: 900px;
-    display: flex;
-    flex-direction: column;
-    padding: 12px;
-  }
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
 
-  .topbar {
-    display: flex;
-    justify-content: space-between;
-    padding: 10px;
-    border: 1px solid #2b2f36;
-    background: #111318;
-  }
 
-  #messages {
-    flex: 1;
-    overflow-y: auto;
-    background: #0b0d12;
-    border: 1px solid #2b2f36;
-    padding: 10px;
-    margin-top: 10px;
-    min-height: 300px;
-  }
+  <style> 
+  
+  * {
+  box-sizing: border-box;
+}
 
-  .msg {
-    padding: 8px;
-    margin: 8px 0;
-    background: #12151c;
-    border-left: 2px solid #5a5f66;
-  }
+input, textarea {
+      margin: 0;
+      padding: 10px;
+      width: 100%;
+      display: block;
+    }
+  
+body {
+  font-family: 'JetBrains Mono', monospace;
+}
+  html {
+  height: 100%;
+}
+    :root {
+      --bg-dark: #0f1113;
+      --bg-sidebar: #1a1d21;
+      --bg-card: #22262a;
+      --primary: #6b7280;
+      --primary-hover: #4b5563;
+      --text-main: #e2e8f0;
+      --text-muted: #94a3b8;
+      --border: #2d3339;
+      --bubble-me: #6b7280;
+      --bubble-them: #2d3339;
+    }
 
-  .user {
-    font-size: 11px;
-    color: #b8b8b8;
-  }
+html, body {
+  font-family: 'JetBrains Mono', monospace;
+}
 
-  .inputRow {
-    display: flex;
-    gap: 8px;
-    margin-top: 10px;
-  }
+input, button, textarea {
+  font-family: inherit;
+}
 
-  input {
-    flex: 1;
-    padding: 10px;
-    background: #0b0d12;
-    border: 1px solid #2b2f36;
-    color: #e6e6e6;
-    font-family: "JetBrains Mono";
-  }
+body {
+  margin: 0;
+    
+  background: var(--bg-dark);
+  color: var(--text-main);
+  height: 100%;
+  width: 100%;
+  overflow: hidden;
+}
 
-  button {
-    padding: 10px 12px;
-    background: #111318;
-    border: 1px solid #2b2f36;
-    color: #e6e6e6;
-    cursor: pointer;
-  }
+    /* Auth Screens */
+    .auth-container {
+      position: fixed;
+      inset: 0;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      background: var(--bg-dark);
+      z-index: 9999;
+      padding: 20px;
+    }
 
-  .usersBox {
-    margin-top: 12px;
-    padding: 10px;
-    border: 1px solid #2b2f36;
-    background: #0b0d12;
-  }
+    .auth-card {
+      background: var(--bg-sidebar);
+      padding: 32px;
+      border-radius: 16px;
+      width: 100%;
+      max-width: 400px;
+      box-shadow: 0 10px 25px rgba(0,0,0,0.5);
+      border: 1px solid var(--border);
+    }
 
-  ul {
-    list-style: none;
-    padding: 0;
-    margin: 0;
-  }
+    .auth-card h2 {
+      margin: 0 0 24px 0;
+      text-align: center;
+      font-weight: 600;
+    }
 
-  li {
-    padding: 6px;
-    margin-bottom: 6px;
-    background: #12151c;
-    border: 1px solid #2b2f36;
-    font-size: 12px;
-  }
+    input {
+      width: 100%;
+      padding: 12px 16px;
+      margin-bottom: 12px;
+      background: var(--bg-dark);
+      color: white;
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      font-size: 14px;
+      transition: border-color 0.2s;
+    }
 
-  .login {
-    position: fixed;
-    inset: 0;
-    background: #05060a;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    gap: 10px;
-  }
-</style>
-</head>
+    input:focus {
+      outline: none;
+      border-color: var(--primary);
+    }
+
+    button {
+      width: 100%;
+      padding: 12px;
+      background: var(--primary);
+      color: white;
+      border: none;
+      border-radius: 8px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: background 0.2s, transform 0.1s;
+      margin-bottom: 8px;
+    }
+
+    button:hover {
+      background: var(--primary-hover);
+    }
+
+    button:active {
+      transform: scale(0.98);
+    }
+
+    button.secondary {
+      background: transparent;
+      border: 1px solid var(--border);
+    }
+
+    button.secondary:hover {
+      background: var(--bg-card);
+    }
+
+    button:disabled {
+      opacity: 0.5;
+      cursor: not-allowed;
+    }
+
+    /* App Layout */
+    #app {
+      display: none;
+      height: 100dvh;
+      width: 100%;
+      flex-direction: row;
+    }
+
+    #sidebar {
+      width: 320px;
+      height: 100%;
+      background: var(--bg-sidebar);
+      border-right: 1px solid var(--border);
+      display: flex;
+      flex-direction: column;
+      transition: transform 0.3s ease;
+    }
+
+    .sidebar-header {
+      padding: 20px;
+      border-bottom: 1px solid var(--border);
+    }
+
+    .sidebar-content {
+      flex: 1;
+      overflow-y: auto;
+      padding: 10px 0;
+    }
+
+    .section-title {
+      padding: 10px 20px;
+      font-size: 12px;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      color: var(--text-muted);
+      font-weight: 600;
+    }
+
+    #main {
+      flex: 1;
+      height: 100%;
+      display: flex;
+      flex-direction: column;
+      background: var(--bg-dark);
+      position: relative;
+    }
+
+    /* Header */
+    .chat-header {
+      height: 64px;
+      padding: 0 20px;
+      display: flex;
+      align-items: center;
+      border-bottom: 1px solid var(--border);
+      background: var(--bg-sidebar);
+    }
+
+#menuBtn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: transparent;
+  border: none;
+  color: white;
+  font-size: 22px;
+  font-weight: 200;
+  letter-spacing: 0.5px;
+  padding: 0;
+  margin-right: 15px;
+  width: 40px;
+  height: 40px;
+  line-height: 1;
+  transform: translateY(3px);
+  outline: none;
+}
+
+#menuBtn {
+  outline: none;
+  border: none;
+  -webkit-tap-highlight-color: transparent;
+}
+
+#menuBtn:focus,
+#menuBtn:active {
+  outline: none;
+  box-shadow: none;
+}
+
+    /* Messages */
+    #messages {
+      flex: 1;
+      overflow-y: auto;
+      padding: 20px;
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+
+    .bubble {
+      max-width: 75%;
+      padding: 10px 16px;
+      border-radius: 18px;
+      font-size: 15px;
+      line-height: 1.4;
+      position: relative;
+      word-wrap: break-word;
+    }
+
+    .bubble.me {
+      align-self: flex-end;
+      background: var(--bubble-me);
+      color: white;
+      border-bottom-right-radius: 4px;
+    }
+
+    .bubble.them {
+      align-self: flex-start;
+      background: var(--bubble-them);
+      color: var(--text-main);
+      border-bottom-left-radius: 4px;
+    }
+
+    .bubble-user {
+      font-size: 11px;
+      margin-bottom: 4px;
+      color: var(--text-muted);
+    }
+
+    /* Input Area */
+#inputArea {
+  padding: 16px 20px;
+  background: var(--bg-sidebar);
+  border-top: 1px solid var(--border);
+  display: flex;
+  gap: 12px;
+  align-items: center;
+}
+
+#msg {
+  flex: 1;
+  width: auto;
+  margin-bottom: 0;
+}
+
+    #sendBtn {
+      width: auto;
+      padding: 10px 24px;
+      margin-bottom: 0;
+    }
+
+    /* Friend Items */
+    .friendItem {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 12px 20px;
+      cursor: pointer;
+      transition: background 0.2s;
+    }
+
+    .friendItem:hover {
+      background: var(--bg-card);
+    }
+
+    .friendItem.active {
+      background: rgba(107, 114, 128, 0.1);
+      border-left: 3px solid var(--primary);
+    }
+
+    .friendAvatar {
+      width: 44px;
+      height: 44px;
+      border-radius: 50px;
+      background: var(--primary);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: 600;
+      color: white;
+      flex-shrink: 0;
+    }
+
+    .friendText {
+      flex: 1;
+      min-width: 0;
+    }
+
+    .friendName {
+      font-weight: 600;
+      font-size: 15px;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .friendSub {
+      font-size: 13px;
+      color: var(--text-muted);
+    }
+
+    /* Requests */
+    .request-item {
+      padding: 12px 20px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      background: rgba(255,255,255,0.03);
+      margin: 4px 10px;
+      border-radius: 8px;
+    }
+
+    .request-item button {
+      width: 32px;
+      height: 32px;
+      padding: 0;
+      margin: 0;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    /* Mobile */
+    @media (max-width: 768px) {
+      #menuBtn { display: block; }
+      #sidebar {
+        position: fixed;
+        left: 0;
+        top: 0;
+        bottom: 0;
+        z-index: 1000;
+        transform: translateX(-100%);
+        width: 280px;
+      }
+      #sidebar.open { transform: translateX(0); }
+      .sidebar-overlay {
+        display: none;
+        position: fixed;
+        inset: 0;
+        background: rgba(0,0,0,0.5);
+        z-index: 999;
+      }
+      .sidebar-overlay.show { display: block; }
+    }
+    
+        .typing {
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      margin: 5px 10px;
+    }
+
+    .typing span {
+      width: 6px;
+      height: 6px;
+      background: #aaa;
+      border-radius: 50%;
+      animation: bounce 1.2s infinite ease-in-out;
+    }
+
+    .typing span:nth-child(2) {
+      animation-delay: 0.2s;
+    }
+
+    .typing span:nth-child(3) {
+      animation-delay: 0.4s;
+    }
+
+    @keyframes bounce {
+      0%, 80%, 100% {
+        transform: scale(0);
+        opacity: 0.3;
+      }
+      40% {
+        transform: scale(1);
+        opacity: 1;
+      }
+    }
+    .spinner {
+  width: 40px;
+  height: 40px;
+  margin: 20px auto 0;
+  border: 4px solid var(--border);
+  border-top: 4px solid var(--primary);
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  100% { transform: rotate(360deg); }
+}
+
+  </style>
 
 <body>
-
-<!-- LOGIN -->
-<div class="login" id="login">
-  <input id="nameInput" placeholder="username..." />
-  <button onclick="setName()">login</button>
+</head>
+<div id="loadingScreen" class="auth-container" style="display:flex;">
+  <div class="auth-card" style="text-align:center;">
+    <h2>Logging in</h2>
+    <div class="spinner"></div>
+  </div>
 </div>
 
-<!-- CHAT -->
-<div class="chat">
+<div id="loginScreen" class="auth-container" style="display: none;">
+  <div class="auth-card">
+    <h2>Cerac Chat</h2>
+<input id="email"
+       type="email"
+       autocomplete="username"
+       placeholder="Email address">
 
-  <div class="topbar">
-    <div>terminal-chat</div>
-    <div>
-      <span id="userDisplay">offline</span>
-      <button onclick="logout()">logout</button>
+<input id="password"
+       type="password"
+       autocomplete="new-password"
+       placeholder="Password">
+    <button id="loginBtn">Sign In</button>
+    <button id="registerBtn" class="secondary">Create Account</button>
+  </div>
+</div>
+
+<div id="verifyScreen" class="auth-container" style="display:none;">
+  <div class="auth-card">
+    <h2>Verify Email</h2>
+    <p style="text-align:center; color:var(--text-muted); margin-bottom:20px;">Please check your inbox for a verification link.</p>
+    <button id="checkVerifyBtn">I've Verified</button>
+    <button id="resendBtn" class="secondary">Resend Email</button>
+  </div>
+</div>
+
+<div id="nameScreen" class="auth-container" style="display:none;">
+  <div class="auth-card">
+    <h2>Your Name</h2>
+   
+   <div id="settingsScreen" class="auth-container" style="display:none;">
+  <div class="auth-card">
+    <h2>Settings</h2>
+
+    <input id="newName" placeholder="Change name">
+    <button id="saveSettingsBtn">Save</button>
+
+    <button onclick="show(screens.app)" class="secondary">Back</button>
+  </div>
+</div>
+
+    <p style="text-align:center; color:var(--text-muted); margin-bottom:20px;">
+      How should friends see you?
+    </p>
+
+    <input id="nameInput" placeholder="Enter your name">
+    <button id="saveNameBtn">Get Started</button>
+  </div>
+ </div>
+
+<div id="app" style="display: none;">
+  <div id="sidebar-overlay" class="sidebar-overlay"></div>
+  <div id="sidebar">
+<div class="sidebar-header">
+  <button id="settingsBtn" class="secondary">Settings</button>
+  <button id="logoutBtn" class="secondary">Sign Out</button>
+</div>
+    
+    <div class="sidebar-content">
+      <div class="section-title">Add Friend</div>
+      <div style="padding: 0 20px 15px;">
+        <input id="searchEmail" placeholder="friend@email.com" style="margin-bottom: 8px;">
+        <button id="searchBtn" style="margin-bottom: 0;">Send Request</button>
+      </div>
+
+      <div class="section-title">Friend Requests</div>
+      <div id="requestsList"></div>
+
+      <div class="section-title">Friends</div>
+      <div id="friendsList"></div>
     </div>
   </div>
 
-  <div id="messages"></div>
-
-  <div class="inputRow">
-    <input id="textInput" placeholder="type message..." />
-    <button onclick="sendText()">SEND</button>
+  <div id="main">
+    <div class="chat-header">
+      <button id="menuBtn">☰</button>
+      <div id="chatTitle" style="font-weight: 600;">Select a chat</div>
+    </div>
+    <div id="messages"></div>
+    
+    <div id="typingIndicator" class="typing" style="display:none;">
+  <span></span>
+  <span></span>
+  <span></span>
+</div>
+    <div id="inputArea">
+  <input id="msg"
+   type="text"
+   name="chat_message_random_9283"
+   autocomplete="off"
+   autocorrect="off"
+   autocapitalize="off"
+   spellcheck="false"
+   inputmode="text"
+   placeholder="Type a message...">
+      <button id="sendBtn">Send</button>
+    </div>
   </div>
-
-  <div class="usersBox">
-    <div>ONLINE USERS</div>
-    <div id="users"></div>
-  </div>
-
 </div>
 
-<script type="module">
+<script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-messaging-compat.js"></script>
 
-import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.0/firebase-app.js";
-import {
-  getFirestore,
-  collection,
-  addDoc,
-  setDoc,
-  deleteDoc,
-  doc,
-  onSnapshot,
-  query,
-  orderBy
-} from "https://www.gstatic.com/firebasejs/10.7.0/firebase-firestore.js";
+<script>
+const el = id => document.getElementById(id);
 
-const firebaseConfig = {
-  apiKey: "YOUR_FIREBASE_KEY",
-  authDomain: "cerac-terminal.firebaseapp.com",
-  projectId: "cerac-terminal",
-  storageBucket: "cerac-terminal.firebasestorage.app",
-  messagingSenderId: "141584321783",
-  appId: "1:141584321783:web:a06f4147d64f87e9db97f2"
-};
-
-const app = initializeApp(firebaseConfig);
-const db = getFirestore(app);
-
-const chatRef = collection(db, "chat");
-const usersRef = collection(db, "users");
-
-let username = null;
-let heartbeat = null;
-let typingTimeout = null;
-
-/* LOGIN */
-window.setName = async function () {
-  const name = document.getElementById("nameInput").value.trim();
-  if (!name) return;
-
-  username = name;
-
-  document.getElementById("login").style.display = "none";
-  document.getElementById("userDisplay").textContent = username;
-
-  await setDoc(doc(db, "users", username), {
-    name: username,
-    lastSeen: Date.now(),
-    typingAt: 0
-  });
-
-  startHeartbeat();
-};
-
-/* ðŸ’¥ FIXED LOGOUT (NO ZOMBIE USERS) */
-window.logout = async function () {
-  if (!username) return;
-
-  const ref = doc(db, "users", username);
-
-  try {
-    // STOP HEARTBEAT FIRST (critical fix)
-    if (heartbeat) clearInterval(heartbeat);
-    heartbeat = null;
-
-    // mark offline instantly
-    await setDoc(ref, {
-      name: username,
-      lastSeen: 0,
-      typingAt: 0
-    }, { merge: true });
-
-    // allow sync time
-    await new Promise(r => setTimeout(r, 250));
-
-    // delete user
-    await deleteDoc(ref);
-
-  } catch (e) {
-    console.log("logout error ignored:", e);
-  }
-
-  // reset state
-  username = null;
-  localStorage.removeItem("scrap_username");
-
-  // reset UI
-  document.getElementById("login").style.display = "flex";
-  document.getElementById("userDisplay").textContent = "offline";
-  document.getElementById("users").innerHTML = "";
-};
-
-/* HEARTBEAT */
-function startHeartbeat() {
-  if (heartbeat) clearInterval(heartbeat);
-
-  heartbeat = setInterval(async () => {
-    if (!username) return;
-
-    await setDoc(doc(db, "users", username), {
-      lastSeen: Date.now()
-    }, { merge: true });
-
-  }, 5000);
+function show(screen){
+  Object.values(screens).forEach(s => s.style.display = "none");
+  screen.style.display = "flex";
 }
 
-/* TYPING */
-document.getElementById("textInput").addEventListener("input", async () => {
-  if (!username) return;
+/* ---------------- FIREBASE INIT ---------------- */
 
-  await setDoc(doc(db, "users", username), {
-    typingAt: Date.now()
-  }, { merge: true });
+const firebaseConfig = {
+  apiKey: "AIzaSyBLXDifxHEXGOzq0Qy0cIbOzT6VADlYxP4",
+  authDomain: "chat-site-cerac.firebaseapp.com",
+  projectId: "chat-site-cerac",
+  storageBucket: "chat-site-cerac.firebasestorage.app",
+  messagingSenderId: "749792238651",
+  appId: "1:749792238651:web:70f061841327384175501e"
+};
 
-  clearTimeout(typingTimeout);
+firebase.initializeApp(firebaseConfig);
 
-  typingTimeout = setTimeout(async () => {
-    if (!username) return;
+const db = firebase.firestore();
+const auth = firebase.auth();
 
-    await setDoc(doc(db, "users", username), {
-      typingAt: 0
-    }, { merge: true });
+auth.setPersistence(firebase.auth.Auth.Persistence.LOCAL);
 
+auth.onAuthStateChanged((user) => {
+});
+
+let messaging = null;
+
+try {
+  messaging = firebase.messaging();
+} catch (e) {
+  console.warn("Messaging not available:", e);
+}
+async function setupPush() {
+  const permission = await Notification.requestPermission();
+  if (permission !== "granted") return;
+
+  const token = await messaging.getToken({
+    vapidKey: "BDI92TWsuS3w_fes3Vqo7ipMYom4DGWpZNFsq5fk1kJ2s44XRGCkiZpzL_pp18lup8XcILVw3Z-ek5sSK8StEtY"
+  });
+
+  console.log("TOKEN:", token);
+}
+
+if ('serviceWorker' in navigator) {
+  navigator.serviceWorker.register('/firebase-messaging-sw.js')
+    .then(() => console.log("Service Worker registered"))
+    .catch(err => console.error("SW failed:", err));
+}
+
+/* ---------------- HELPERS ---------------- */
+window.addEventListener("DOMContentLoaded", () => {
+
+  el("checkVerifyBtn").onclick = async () => {
+    const user = auth.currentUser;
+    if (user) {
+      await user.reload();
+      if (user.emailVerified) {
+        start();
+      } else {
+        alert("Please verify your email first!");
+      }
+    }
+  };
+
+let isTyping = false;
+
+el("msg").addEventListener("input", () => {
+  if (!currentChat) return;
+
+  const ref = typingRef();
+  if (!ref) return;
+
+  if (!isTyping) {
+    isTyping = true;
+    ref.set({ typing: true });
+  }
+
+  clearTimeout(typingTimer);
+
+  typingTimer = setTimeout(() => {
+    isTyping = false;
+    const r = typingRef();
+    if (r) r.set({ typing: false });
   }, 1200);
 });
 
-/* SEND */
-window.sendText = async function () {
-  const input = document.getElementById("textInput");
-  const text = input.value.trim();
-  if (!text || !username) return;
-
-  await addDoc(chatRef, {
-    text,
-    user: username,
-    time: Date.now()
-  });
-
-  input.value = "";
-
-  await setDoc(doc(db, "users", username), {
-    typingAt: 0
-  }, { merge: true });
-};
-
-/* CHAT */
-onSnapshot(query(chatRef, orderBy("time")), snap => {
-  const box = document.getElementById("messages");
-  box.innerHTML = "";
-
-  snap.forEach(d => {
-    const data = d.data();
-
-    const div = document.createElement("div");
-    div.className = "msg";
-
-    div.innerHTML = `
-      <div class="user">> ${data.user}</div>
-      <div>${data.text}</div>
-    `;
-
-    box.appendChild(div);
-  });
 });
 
-/* USERS (STABLE + NO EMPTY BUG) */
-const typingStates = {};
+/* prevent browser password weirdness */
 
-onSnapshot(usersRef, snap => {
-  const usersBox = document.getElementById("users");
-  usersBox.innerHTML = "";
+// empty right now 
 
-  const now = Date.now();
-  const users = [];
+/* ---------------- STATE ---------------- */
+const screens = {
+  login: el("loginScreen"),
+  verify: el("verifyScreen"),
+  name: el("nameScreen"),
+  loading: el("loadingScreen"),
+  settings: el("settingsScreen"),
+  app: el("app")
+};
 
-  snap.forEach(d => {
-    const u = d.data();
-    if (!u?.name) return;
+      el("sendBtn").onclick = async () => {
+  if (!currentChat) return;
 
-    const lastSeen = u.lastSeen ?? now;
-    const online = now - lastSeen < 20000;
+  const input = el("msg");
+  const text = input.value.trim();
+  if (!text) return;
 
-    if (online) users.push(u);
+if (currentChat) typingRef().set({ typing: false });
+
+  // instant UI clear (feels faster)
+  input.value = "";
+  input.focus();
+
+  // send in background (no waiting)
+db.collection("chats")
+  .doc(currentChat)
+  .collection("messages")
+  .add({
+  user: userName,
+  senderId: uid,
+  text,
+serverTime: firebase.firestore.FieldValue.serverTimestamp(),
+deliveredTo: [uid],
+readBy: []
+});
+db.collection("chats").doc(currentChat).set({
+  lastMessage: text,
+  lastTime: firebase.firestore.FieldValue.serverTimestamp()
+}, { merge: true });
+};
+
+let uid = "";
+let userName = "";
+let currentChat = null;
+let chatVisible = false;
+let otherUserId = null;
+let typingTimer;
+let started = false;
+
+const typingRef = () => db
+  .collection("chats")
+  .doc(currentChat)
+  .collection("typing")
+  .doc(uid);
+
+let typingTimeout;
+
+let unsubUser = null;
+let unsubMessages = null;
+let messageCache = {};
+
+function markChatAsRead() {
+  if (!currentChat) return;
+
+  db.collection("chats")
+    .doc(currentChat)
+    .collection("messages")
+    .where("senderId", "==", otherUserId)
+    .get()
+    .then(snapshot => {
+      snapshot.forEach(doc => {
+        doc.ref.update({
+          readBy: firebase.firestore.FieldValue.arrayUnion(uid),
+          deliveredTo: firebase.firestore.FieldValue.arrayUnion(uid)
+        });
+      });
+    });
+}
+
+/* ---------------- UI ---------------- */
+const sidebar = el("sidebar");
+const menuBtn = el("menuBtn");
+const overlay = el("sidebar-overlay");
+
+const toggleSidebar = () => {
+  sidebar.classList.toggle("open");
+  overlay.classList.toggle("show");
+};
+
+menuBtn.onclick = toggleSidebar;
+overlay.onclick = toggleSidebar;
+
+/* ---------------- AUTH ---------------- */
+el("registerBtn").onclick = async () => {
+  try {
+    el("registerBtn").disabled = true;
+
+    const c = await auth.createUserWithEmailAndPassword(
+      el("email").value,
+      el("password").value
+    );
+
+    await c.user.sendEmailVerification();
+    show(screens.verify);
+
+  } catch (e) {
+    alert(e.message);
+  } finally {
+    el("registerBtn").disabled = false;
+  }
+};
+
+el("loginBtn").onclick = async () => {
+  try {
+    el("loginBtn").disabled = true;
+
+    await auth.signInWithEmailAndPassword(
+      el("email").value,
+      el("password").value
+    );
+
+  } catch (e) {
+    alert(e.message);
+  } finally {
+    el("loginBtn").disabled = false;
+  }
+};
+
+el("logoutBtn").onclick = async () => {
+  await auth.signOut();
+
+  started = false;
+  uid = "";
+  currentChat = null;
+
+  if (unsubUser) unsubUser();
+  if (unsubMessages) unsubMessages();
+
+  show(screens.login);
+};
+
+el("saveSettingsBtn").onclick = async () => {
+  const name = el("newName").value.trim();
+  if (!name) return;
+
+  await db.collection("users").doc(uid).update({ name });
+
+  userName = name;
+  show(screens.app);
+};
+
+el("settingsBtn").onclick = () => {
+  show(screens.settings);
+};
+
+/* ---------------- AUTH STATE ---------------- */
+auth.onAuthStateChanged(async (user) => {
+console.log("AUTH STATE:", user);
+console.log("START CALLED");
+
+  try {
+    if (!user) {
+      show(screens.login);
+      return;
+    }
+
+    show(screens.loading);
+
+    if (!user.emailVerified) {
+      show(screens.verify);
+      return;
+    }
+
+    await start();
+    setupPush();
+
+  } catch (e) {
+    console.error(e);
+    show(screens.login);
+  }
+});
+
+/* ---------------- START APP ---------------- */
+async function start() {
+  try {
+    const user = auth.currentUser;
+    console.log("START CALLED:", user);
+
+    if (!user) return;
+
+    uid = user.uid;
+
+    const doc = await db.collection("users").doc(user.uid).get();
+
+    if (!doc.exists) {
+      show(screens.name);
+      return;
+    }
+
+    userName = doc.data().name || "User";
+    started = true;
+
+    show(screens.app);
+    listenChats();
+    listenUser();
+
+  } catch (e) {
+    console.error("START FAILED:", e);
+    show(screens.login);
+  }
+}
+
+/* ---------------- SET NAME ---------------- */
+
+el("saveNameBtn").onclick = async () => {
+  try {
+    const name = el("nameInput").value.trim();
+    if (!name) return;
+
+    if (!auth.currentUser) return;
+
+    el("saveNameBtn").disabled = true;
+
+    const uid = auth.currentUser.uid;
+
+    await db.collection("users").doc(uid).set({
+      name,
+      email: auth.currentUser.email,
+      friends: [],
+      requests: []
+    });
+
+    await start();
+
+  } catch (e) {
+    console.error("SAVE NAME FAILED:", e);
+    alert(e.message);
+  } finally {
+    el("saveNameBtn").disabled = false;
+  }
+};
+
+/* ---------------- FRIEND REQUEST ---------------- */
+el("searchBtn").onclick = async () => {
+  const email = el("searchEmail").value.trim();
+  if (!email) return;
+
+  try {
+    el("searchBtn").disabled = true;
+
+    const snap = await db.collection("users")
+      .where("email", "==", email)
+      .get();
+
+    if (snap.empty) return alert("User not found");
+
+    const id = snap.docs[0].id;
+    if (id === uid) return alert("You cannot add yourself");
+
+    await db.collection("friendRequests").add({
+      from: uid,
+      to: id,
+      status: "pending",
+      time: firebase.firestore.FieldValue.serverTimestamp()
+    });
+
+    el("searchEmail").value = "";
+    alert("Request Sent!");
+
+  } catch (e) {
+    alert(e.message);
+  } finally {
+    el("searchBtn").disabled = false;
+  }
+};
+
+/* ---------------- USER LISTENER ---------------- */
+function listenUser(){
+  if (!auth.currentUser) return;
+  uid = auth.currentUser.uid;
+
+  if (unsubUser) unsubUser();
+
+  unsubUser = db.collection("users").doc(uid)
+    .onSnapshot(doc => {
+      const d = doc.data() || {};
+      renderFriends(d.friends || []);
+    });
+
+  db.collection("friendRequests")
+    .where("to", "==", uid)
+    .where("status", "==", "pending")
+    .onSnapshot(async snap => {
+
+      const container = el("requestsList");
+      container.innerHTML = "";
+
+      for (const docSnap of snap.docs) {
+        const data = docSnap.data();
+        const fromUser = (await db.collection("users").doc(data.from).get()).data();
+
+        const div = document.createElement("div");
+        div.className = "request-item";
+
+        const name = document.createElement("span");
+        name.textContent = fromUser?.name || "Unknown";
+
+const acceptBtn = document.createElement("button");
+acceptBtn.textContent = "✓";
+
+acceptBtn.onclick = async () => {
+  await db.collection("friendRequests").doc(docSnap.id).update({
+    status: "accepted"
   });
 
-  if (users.length === 0) {
-    const empty = document.createElement("div");
-    empty.style.fontSize = "12px";
-    empty.style.opacity = "0.6";
-    empty.textContent = "no users online";
-    usersBox.appendChild(empty);
+  await db.collection("users").doc(uid).update({
+    friends: firebase.firestore.FieldValue.arrayUnion(data.from)
+  });
+
+  await db.collection("users").doc(data.from).update({
+    friends: firebase.firestore.FieldValue.arrayUnion(uid)
+  });
+};
+
+const declineBtn = document.createElement("button");
+declineBtn.textContent = "✕";
+
+declineBtn.onclick = async () => {
+  await db.collection("friendRequests").doc(docSnap.id).update({
+    status: "declined"
+  });
+};
+
+div.appendChild(name);
+div.appendChild(acceptBtn);
+div.appendChild(declineBtn);
+
+container.appendChild(div);
+      }
+    });
+}
+
+/* ---------------- FRIENDS ---------------- */
+async function renderFriends(list){
+  const container = el("friendsList");
+  container.innerHTML = "";
+
+  if (!list.length) {
+    container.innerHTML = "<div style='padding:20px;color:#888'>No friends yet</div>";
     return;
   }
 
-  users.sort((a, b) => a.name.localeCompare(b.name));
+  const users = await Promise.all(
+    list.map(id => db.collection("users").doc(id).get())
+  );
 
-  const ul = document.createElement("ul");
+  users.forEach(doc => {
+    const d = doc.data();
+    if (!d) return;
 
-  users.forEach(u => {
-    let label = u.name;
+    const div = document.createElement("div");
+    div.className = "friendItem";
 
-    const isTyping =
-      u.name !== username &&
-      u.typingAt &&
-      now - u.typingAt < 2500;
+    div.innerHTML = `
+      <div class="friendAvatar">${(d.name || "?")[0]}</div>
+      <div class="friendText">
+        <div class="friendName">${d.name}</div>
+        <div class="friendSub">Tap to chat</div>
+      </div>
+    `;
 
-    if (isTyping) label += " (typing...)";
+    div.onclick = () => {
+    console.log("CLICKED FRIEND");
+    
+      el("chatTitle").textContent = d.name;
+      openChat(doc.id);
+    };
 
-    const li = document.createElement("li");
-    li.textContent = label;
-
-    ul.appendChild(li);
+    container.appendChild(div);
   });
+}
 
-  usersBox.appendChild(ul);
-});
+/* ---------------- CHAT ---------------- */
+function chatId(a,b){
+  return [a,b].sort().join("_");
+}
 
-/* RESTORE SESSION */
-const saved = localStorage.getItem("scrap_username");
-if (saved) {
-  username = saved;
-  document.getElementById("login").style.display = "none";
-  document.getElementById("userDisplay").textContent = username;
-  startHeartbeat();
+function openChat(other){
+  otherUserId = other;
+  currentChat = chatId(uid, other);
+  
+  chatVisible = true;
+
+  messageCache = {};
+  el("messages").innerHTML = "";
+
+  if (unsubMessages) unsubMessages();
+  if (unsubTyping) unsubTyping();
+
+  listenMessages();
+  listenTyping();
+  
+}
+
+let unsubTyping = null;
+
+function listenChats() {
+if (!uid) return;
+  db.collection("chats")
+    .where("users", "array-contains", uid)
+    .orderBy("lastTime", "desc")
+    .onSnapshot(async snap => {
+
+      const container = el("friendsList");
+      container.innerHTML = "";
+
+const chats = snap.docs.map(doc => ({
+  id: doc.id,
+  data: doc.data()
+}));
+
+for (const chat of chats) {
+  const data = chat.data;
+
+  const otherId = data.users.find(u => u !== uid);
+  const userDoc = await db.collection("users").doc(otherId).get();
+  const d = userDoc.data();
+
+  const div = document.createElement("div");
+  div.className = "friendItem";
+
+  div.innerHTML = `
+    <div class="friendAvatar">${(d.name || "?")[0]}</div>
+    <div class="friendText">
+      <div class="friendName">${d.name}</div>
+      <div class="friendSub">${data.lastMessage || ""}</div>
+    </div>
+  `;
+
+  div.onclick = () => {
+    el("chatTitle").textContent = d.name;
+    openChat(otherId);
+  };
+
+  container.appendChild(div);
+}
+    });
+}
+
+function listenTyping() {
+  if (unsubTyping) unsubTyping();
+
+  unsubTyping = db.collection("chats")
+    .doc(currentChat)
+    .collection("typing")
+    .onSnapshot(snapshot => {
+
+      let someoneTyping = false;
+
+      snapshot.forEach(doc => {
+        if (doc.id !== uid && doc.data().typing) {
+          someoneTyping = true;
+        }
+      });
+
+      el("typingIndicator").style.display =
+        someoneTyping ? "inline-flex" : "none";
+    });
+}
+
+function listenMessages(){
+  if (unsubMessages) unsubMessages();
+
+  el("messages").innerHTML = "";
+
+  unsubMessages = db.collection("chats")
+    .doc(currentChat)
+    .collection("messages")
+    .orderBy("serverTime", "asc")
+    .onSnapshot(snap => {
+
+      const container = el("messages");
+
+      snap.docChanges().forEach(change => {
+  if (change.type !== "added" && change.type !== "modified") return;
+
+  const doc = change.doc;
+  const m = doc.data();
+  const isMe = m.senderId === uid;
+  
+  if (!isMe && !m.readBy?.includes(uid)) {
+  doc.ref.update({
+    readBy: firebase.firestore.FieldValue.arrayUnion(uid),
+    deliveredTo: firebase.firestore.FieldValue.arrayUnion(uid)
+  });
+}
+
+        const timeObj = m.serverTime?.toDate?.();
+        const timeStr = timeObj
+          ? timeObj.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
+          : "";
+
+        const read = m.readBy?.includes(uid);
+
+        let ticks = "";
+        let tickColor = "inherit";
+
+        if (isMe) {
+          const delivered = m.deliveredTo?.length > 0;
+
+          if (!delivered) {
+            ticks = "✓";
+          } else if (!read) {
+            ticks = "✓✓";
+          } else {
+            ticks = "✓✓";
+            tickColor = "#4da3ff";
+          }
+        }
+
+        const div = document.createElement("div");
+        div.id = doc.id;
+        div.className = "bubble " + (isMe ? "me" : "them");
+
+        div.innerHTML = `
+          <div class="bubble-user">${m.user}</div>
+          ${m.text}
+          <div style="font-size:10px;opacity:0.6;margin-top:4px;display:flex;gap:6px;">
+            <span>${timeStr}</span>
+            ${isMe ? `<span style="color:${tickColor}">${ticks}</span>` : ""}
+          </div>
+        `;
+
+        const existing = document.getElementById(doc.id);
+
+if (existing) {
+  existing.replaceWith(div);
+} else {
+  container.appendChild(div);
+}
+      });
+
+      container.scrollTop = container.scrollHeight;
+    });
 }
 
 </script>
 
-</body>
-</html>
+</body></html>
